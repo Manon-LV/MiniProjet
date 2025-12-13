@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Environment
+.env
+.venv/
+venv/
+ENV/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Data
+*.sqlite3
+*.db
+*.h5
+*.pth
+*.ckpt
+
+# Others
+*.swp
+*.bak
+*.tmp
+
+# Ignore model weights and outputs
+*.pt
+*.onnx
+outputs/
