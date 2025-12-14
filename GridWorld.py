@@ -29,7 +29,7 @@ class GridWorld:
 
 
     #Constructeur de la classe GridWorld
-    def __init__(self, size=10, n_obstacle=15, max_step=200):
+    def __init__(self, size=10, n_obstacle=5, max_step=200):
         ''' 
         Constructeur de la classe GridWorld.
         inputs:
@@ -47,7 +47,7 @@ class GridWorld:
     #fonction de réinitialisation de l'environnement
     def reset(self):
         ''' 
-        Réinitialise l'environnement GridWorld. C'est à dire, place l'agent au point de départ (0,0), 
+        Réinitialise l'environnement GridWorld. C'est à dire, place l'agentà un point aléatoire, 
         génère des obstacles aléatoires et place l'objectif à une position aléatoire. 0 signifie une cellule vide,
         1 signifie un obstacle.
         outputs:
@@ -62,7 +62,7 @@ class GridWorld:
         while buffer_obs < self.n_obstacle:
             x = np.random.randint(0, self.size)
             y = np.random.randint(0, self.size)
-            if self.grid[y][x] == 0 and (x,y)!=(0,0):
+            if self.grid[y][x] == 0 :
                 self.grid[y][x] = 1 
                 buffer_obs += 1
         # Placement de l'agent à une position aléatoire
@@ -145,5 +145,5 @@ class GridWorld:
             return self.__get_obs(), 10.0, True, {}
         # Vérification du nombre maximum de pas
         if self.steps >= self.max_step:
-            return self.__get_obs(), -1.0, True, {}
-        return self.__get_obs(), -0.1, False, {}
+            return self.__get_obs(), -0.5, True, {}
+        return self.__get_obs(), -0.01, False, {}

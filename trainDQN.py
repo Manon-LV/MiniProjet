@@ -6,10 +6,24 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 import random
-import numpy as np
+import numpy as np 
+import time
+import matplotlib.pyplot as plt
+from collections import deque
 from GridWorld import GridWorld
 from DQN import DQN
 from ReplayBuffer import ReplayBuffer
+
+#==================================================================================================================================
+#Création des variables d'évaluations
+#==================================================================================================================================
+success_window = deque(maxlen=100)
+success_rates = []
+success_history = []
+episode_rewards = []
+losses = []
+training_times = []
+start_time = time.time()
 #==================================================================================================================================
 #Implémentation de la boucle d'entraînement DQN
 #==================================================================================================================================
@@ -22,12 +36,12 @@ def train():
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
-    optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
+    optimizer = optim.Adam(policy_net.parameters(), lr=1e-4)
     rb = ReplayBuffer()
     eps_start = 1.0
     eps_end = 0.05
     eps_decay = 20000
-    gamma = 0.99
+    gamma = 0.95
     batch_size=64
     target_update=1000
     total_steps=0
@@ -52,6 +66,7 @@ def train():
                    a = int(q_values.argmax(1).item())
             # Exécution de l'action dans l'environnement
             s2, r, done, _ = env.step(a)
+            r = np.clip(r, -1.0, 1.0)
             rb.push(s, a, r, s2, done)
             s = s2
             episode_reward += r
@@ -69,18 +84,98 @@ def train():
                 with torch.no_grad():
                     next_q_values = target_net(s2_batch).max(1)[0].unsqueeze(1)
                     target_q_values = r_batch + gamma * next_q_values * (1.0 - done_batch)
-                loss = nn.MSELoss()(q_values, target_q_values)
-                optimizer.zero_grad(); loss.backward(); optimizer.step()
-            
+                # Calcul de la perte et optimisation du réseau
+                criterion = nn.MSELoss()
+                loss = criterion(q_values, target_q_values)
+                losses.append(loss.item())
+                optimizer.zero_grad(); loss.backward()
+                torch.nn.utils.clip_grad_norm_(policy_net.parameters(), 1.0)
+                optimizer.step()
             # Mise à jour du réseau cible
             if total_steps % target_update == 0:
                 target_net.load_state_dict(policy_net.state_dict())
+        
+        # Fin de l'épisode : enregistrement des statistiques
+        success = 1 if done and env.agent == env.goal else 0
+        success_window.append(success)
+        success_history.append(success)
+
+
+        if len(success_window) == 100:
+            success_rates.append(sum(success_window) / 100.0)
+        else : 
+            success_rates.append(sum(success_window) / len(success_window))
+
+        episode_rewards.append(episode_reward)
 
         # Affichage des statistiques de l'épisode    
         if episode %10 == 0:
             print(f"Episode {episode}, Reward: {episode_reward:.2f}, Epsilon: {eps:.3f}")
-
-
+        # Enregistrement du temps d'entraînement
+        training_times.append(time.time() - start_time)
+    return device
 # Lancement de l'entraînement
 if __name__ == "__main__":
-    train()
+    device =train()
+    end_time = time.time()
+    training_time = end_time - start_time
+
+    print(f"Temps total d'entraînement : {training_time:.2f} secondes")
+    print(f"Device utilisé : {device}")
+    global_success_rate = sum(success_history) / len(success_history)
+
+    print(f"Taux de succès global : {global_success_rate:.3f}")
+    
+
+
+#==================================================================================================================================
+#Affichage des courbes d'évaluation
+#==================================================================================================================================
+
+window = 100
+avg_rewards = np.convolve(
+    episode_rewards,
+    np.ones(window)/window,
+    mode="valid"
+)
+
+plt.figure()
+plt.plot(avg_rewards)
+plt.xlabel("Episodes")
+plt.ylabel("Average reward (100 episodes)")
+plt.title("Récompense moyenne glissante")
+plt.grid()
+
+# Courbe du taux de succès
+plt.figure()
+plt.plot(success_rates)
+plt.xlabel("Episodes")
+plt.ylabel("Success rate (moving average 100)")
+plt.title("Taux de succès")
+plt.grid()
+
+# Courbe de la récompense par épisode
+plt.figure()
+plt.plot(episode_rewards)
+plt.xlabel("Episodes")
+plt.ylabel("Episode reward")
+plt.title("Récompense par épisode")
+plt.grid()
+
+# Courbe de la perte DQN
+plt.figure()
+plt.plot(losses)
+plt.xlabel("Training steps")
+plt.ylabel("Loss")
+plt.title("Loss DQN")
+plt.grid()
+
+# Courbe du temps d'entraînement
+plt.figure()
+plt.plot(training_times)
+plt.xlabel("Episodes")
+plt.ylabel("Temps cumulé (s)")
+plt.title("Temps d'entraînement")
+plt.grid()
+plt.show()
+

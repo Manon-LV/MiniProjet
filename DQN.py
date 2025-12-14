@@ -24,11 +24,11 @@ from collections import deque, namedtuple
 #Implémentation de la classe DQN
 #==================================================================================================================================
 class DQN(nn.Module):
-    def __init__(self, in_change=3, n_actions = 4) :
+    def __init__(self, in_channel=3, n_actions = 4) :
         '''
         Constructeur de la classe DQN.
         inputs:
-            in_change (int): Nombre de canaux en entrée (par exemple, 3 pour une image RGB).
+            in_channel (int): Nombre de canaux en entrée
             n_actions (int): Nombre d'actions possibles.
         '''
         # Appel du constructeur de la classe parente nn.Module
@@ -36,7 +36,7 @@ class DQN(nn.Module):
         # Définition des couches du réseau
         self.conv=nn.Sequential(
             #couches convolutionnelles pour extraire les caractéristiques de l'entrée
-            nn.Conv2d(in_change, 16, kernel_size=3, padding=1),
+            nn.Conv2d(in_channel, 16, kernel_size=3, padding=1),
             #couche d'activation ReLU pour introduire la non-linéarité
             nn.ReLU(),
             # deuxième couche convolutionnelle pour extraire des caractéristiques plus complexes
