@@ -63,7 +63,7 @@ class CNN(nn.Module):
         self.conv3 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
         self.bn3 = nn.BatchNorm2d(64)
         self.pool = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(64 * 2 * 2, 128)
+        self.fc1 = nn.Linear(64 * 1 * 1, 128)
         self.dropout = nn.Dropout(0.5)
         self.fc2 = nn.Linear(128, 4)
 

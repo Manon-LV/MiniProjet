@@ -15,6 +15,13 @@ import CNN
 import time
 import matplotlib.pyplot as plt
 from torch.utils.data import random_split
+# Détection du device (GPU MPS ou CPU)
+if torch.backends.mps.is_available():
+    device = torch.device("mps")
+    print("Utilisation du GPU MPS (Apple Silicon)")
+else:
+    device = torch.device("cpu")
+    print("GPU MPS non disponible, utilisation du CPU")
 #=================================================================================================================================================================
 # Initialisation des listes pour le suivi des performances
 #=================================================================================================================================================================
@@ -38,6 +45,10 @@ y = np.load("y.npy")
 X = torch.tensor(X)
 y = torch.tensor(y)
 
+# Déplacement des données sur le device
+X = X.to(device)
+y = y.to(device)
+
 # Création du DataLoader pour le dataset
 dataset = torch.utils.data.TensorDataset(X, y)
 # Division du dataset en ensembles d'entraînement et de test
@@ -52,7 +63,7 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=F
 # Entraînement du modèle CNN
 #=================================================================================================================================================================
 # Initialisation du modèle, de l'optimiseur et de la fonction de perte
-model = CNN.CNN()
+model = CNN.CNN().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 criterion = torch.nn.CrossEntropyLoss()
 model.train()
@@ -66,18 +77,16 @@ def evaluate(model, test_loader, criterion):
     total_loss = 0.0
     correct = 0
     total = 0
-    # Désactivation du calcul des gradients
     with torch.no_grad():
-        # boucle sur les batches de données
         for xb, yb in test_loader:
+            xb = xb.to(device)
+            yb = yb.to(device)
             logits = model(xb)
             loss = criterion(logits, yb)
             total_loss += loss.item()
-
             preds = torch.argmax(logits, dim=1)
             correct += (preds == yb).sum().item()
             total += yb.size(0)
-    # Calcul des métriques
     avg_loss = total_loss / len(test_loader)
     accuracy = correct / total
     return avg_loss, accuracy
@@ -92,13 +101,13 @@ for epoch in range(30):
     epoch_start = time.time()
     # boucle sur les batches de données
     for xb, yb in train_loader:
-        # passage avant, calcul de la perte, rétropropagation et mise à jour des poids
+        xb = xb.to(device)
+        yb = yb.to(device)
         logits = model(xb)
         loss = criterion(logits, yb)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        # mise à jour des statistiques de l'époque
         epoch_loss += loss.item()
         preds = torch.argmax(logits, dim=1)
         correct += (preds == yb).sum().item()
