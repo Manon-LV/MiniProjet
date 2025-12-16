@@ -52,7 +52,7 @@ def train(visualize=False, render_interval=100):
     batch_size=64
     target_update=1000
     total_steps=0
-    nb_episodes = 30000
+    nb_episodes = 2000
 
     # Boucle principale d'entraînement 
     for episode in range(1, nb_episodes + 1):
@@ -130,7 +130,7 @@ def train(visualize=False, render_interval=100):
 
         # Affichage des statistiques de l'épisode    
         if episode %10 == 0:
-            print(f"Episode {episode}, Reward: {episode_reward:.2f}, Epsilon: {eps:.3f}")
+            print(f"Episode {episode}, Reward: {episode_reward:.2f}, Epsilon: {eps:.3f}, Success Rate (last 100): {success_rates[-1]:.3f}, steps: {env.steps}, Loss: {np.mean(losses[-100:]):.4f}")
         # Enregistrement du temps d'entraînement
         training_times.append(time.time() - start_time)
     

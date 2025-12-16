@@ -80,6 +80,7 @@ class GridWorld:
             gx, gy = np.random.randint(0, self.size, size=2)
             if self.grid[gy][gx] == 0 and (gx,gy)!=self.agent:
                 break
+        self.last_action = None
         self.goal = (gx, gy)
         self.steps = 0
         return self.__get_obs()
@@ -132,28 +133,36 @@ class GridWorld:
         ax, ay = self.agent
         # nouvelle position de l'agent
         nx, ny = ax + dx[action], ay + dy[action]
+        inverse = {0:1, 1:0, 2:3, 3:2}
+        penalty = 0.0
 
+        if self.last_action is not None and action == inverse[self.last_action]:
+            penalty = -0.2 
         # Vérification des limites de la grille
         if nx < 0 or nx >= self.size or ny < 0 or ny >= self.size:
             nx, ny = ax, ay
             # empêche l'agent de sortir de la grille
-            return self.__get_obs(), 0.0, False, {}
+            self.last_action = action
+            return self.__get_obs(), 0.0 + penalty, False, {}
         #Ajout du compteur de pas
         self.steps +=1
         # Vérification des obstacles
         if self.grid[ny][nx] == 1:
-            reward = -5.0
+            reward = -20.0
             done = True
             self.agent = (nx, ny)
             return self.__get_obs(), reward, done, {}
         self.agent = (nx, ny)
         # Vérification de l'objectif
         if self.agent == self.goal:
-            return self.__get_obs(), 10.0, True, {}
+            self.last_action = action
+            return self.__get_obs(), 10.0 + penalty, True, {}
         # Vérification du nombre maximum de pas
         if self.steps >= self.max_step:
-            return self.__get_obs(), -0.5, True, {}
-        return self.__get_obs(), -0.01, False, {}
+            self.last_action = action
+            return self.__get_obs(), -10 + penalty, True, {}
+        self.last_action = action
+        return self.__get_obs(), -0.05 + penalty, False, {}
 
 
     #fonction pour visualiser l'environnement
