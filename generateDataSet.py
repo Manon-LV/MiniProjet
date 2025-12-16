@@ -15,14 +15,59 @@ from GridWorld import GridWorld
 
 
 
-# Fonction pour déterminer l'action optimale basée sur la position de l'agent et de l'objectif
-def best_action(agent_pos, goal_pos):
+# Fonction pour déterminer l'action optimale basée sur A* avec diversité
+import random
+def best_action(agent_pos, goal_pos, grid, size):
+    """
+    Trouve la première action d'un chemin optimal (A*) de agent_pos à goal_pos en évitant les obstacles.
+    Si plusieurs chemins optimaux existent, choisit aléatoirement la première action parmi eux.
+    Actions: 0=haut, 1=bas, 2=gauche, 3=droite
+    """
+    from collections import deque
+    dx = [-1, 1, 0, 0]
+    dy = [0, 0, -1, 1]
+    actions = [0, 1, 2, 3]
+
+    def heuristic(a, b):
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+    # A* pour trouver tous les chemins optimaux
+    queue = deque()
+    queue.append((agent_pos, [], 0))  # (pos, path, cost)
+    visited = {agent_pos: 0}
+    min_cost = None
+    optimal_first_actions = set()
+
+    while queue:
+        pos, path, cost = queue.popleft()
+        if min_cost is not None and cost > min_cost:
+            continue
+        if pos == goal_pos:
+            if min_cost is None:
+                min_cost = cost
+            if path:
+                optimal_first_actions.add(path[0])
+            continue
+        for a in actions:
+            nx, ny = pos[0] + dx[a], pos[1] + dy[a]
+            if 0 <= nx < size and 0 <= ny < size and grid[ny][nx] == 0:
+                next_pos = (nx, ny)
+                next_cost = cost + 1
+                if next_pos not in visited or visited[next_pos] >= next_cost:
+                    visited[next_pos] = next_cost
+                    queue.append((next_pos, path + [a], next_cost))
+    if optimal_first_actions:
+        return random.choice(list(optimal_first_actions))
+    # Si aucun chemin optimal trouvé, choisir une action valide au hasard
+    valid_actions = []
     ax, ay = agent_pos
-    gx, gy = goal_pos
-    if abs(gx - ax) > abs(gy - ay):
-        return 3 if gx > ax else 2
-    else:
-        return 1 if gy > ay else 0
+    for a in actions:
+        nx, ny = ax + dx[a], ay + dy[a]
+        if 0 <= nx < size and 0 <= ny < size and grid[ny][nx] == 0:
+            valid_actions.append(a)
+    if valid_actions:
+        return random.choice(valid_actions)
+    return random.choice(actions)  # Si bloqué, action aléatoire
 
 
 #=================================================================================================================================================================================
