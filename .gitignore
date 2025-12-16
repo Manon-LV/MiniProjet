@@ -40,3 +40,14 @@ Thumbs.db
 *.pt
 *.onnx
 outputs/
+
+
+# Ignore dataset files
+X_200000.npy
+y_200000.npy
+
+X.npy
+y.npy
+
+X_20000.npy
+y_20000.npy

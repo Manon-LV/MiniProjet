@@ -13,6 +13,9 @@ from collections import deque
 from GridWorld import GridWorld
 from DQN import DQN
 from ReplayBuffer import ReplayBuffer
+import logging
+
+logging.basicConfig(level=logging.INFO) 
 
 #==================================================================================================================================
 #Création des variables d'évaluations
@@ -33,13 +36,13 @@ def train():
     # Détection du device optimal (MPS pour Mac, sinon CUDA, sinon CPU)
     if torch.backends.mps.is_available() and torch.backends.mps.is_built():
         device = torch.device('mps')
-        print("[INFO] Utilisation du GPU MPS (Apple Silicon)")
+        logging.info("Utilisation du GPU MPS (Apple Silicon)")
     elif torch.cuda.is_available():
         device = torch.device('cuda')
-        print("[INFO] Utilisation du GPU CUDA")
+        logging.info("Utilisation du GPU CUDA")
     else:
         device = torch.device('cpu')
-        print("[INFO] Utilisation du CPU uniquement")
+        logging.info("Utilisation du CPU")
     policy_net = DQN().to(device)
     target_net = DQN().to(device)
     target_net.load_state_dict(policy_net.state_dict())
@@ -56,7 +59,7 @@ def train():
     total_steps=0
 
     # Boucle principale d'entraînement 
-    for episode in range(1, 2001):
+    for episode in range(1, 10001):
         # Initialisation de l'épisode
         s=env.reset()
         done = False
@@ -119,7 +122,7 @@ def train():
 
         # Affichage des statistiques de l'épisode    
         if episode %10 == 0:
-            print(f"Episode {episode}, Reward: {episode_reward:.2f}, Epsilon: {eps:.3f}")
+            logging.info(f"Episode {episode}, Reward: {episode_reward:.2f}, Epsilon: {eps:.3f}")
         # Enregistrement du temps d'entraînement
         training_times.append(time.time() - start_time)
     return device
@@ -129,11 +132,10 @@ if __name__ == "__main__":
     end_time = time.time()
     training_time = end_time - start_time
 
-    print(f"Temps total d'entraînement : {training_time:.2f} secondes")
-    print(f"Device utilisé : {device}")
+    logging.info(f"Temps total d'entraînement : {training_time:.2f} secondes")
+    logging.info(f"Device utilisé : {device}")
     global_success_rate = sum(success_history) / len(success_history)
-
-    print(f"Taux de succès global : {global_success_rate:.3f}")
+    logging.info(f"Taux de succès global : {global_success_rate:.3f}")
     
 
 

@@ -10,18 +10,21 @@
 # Importations
 #=================================================================================================================================================================
 import torch
+import logging
 import numpy as np
 import CNN
 import time
 import matplotlib.pyplot as plt
 from torch.utils.data import random_split
+
+logging.basicConfig(level=logging.INFO) 
 # Détection du device (GPU MPS ou CPU)
 if torch.backends.mps.is_available():
     device = torch.device("mps")
-    print("Utilisation du GPU MPS (Apple Silicon)")
+    logging.info("Utilisation du GPU MPS (Apple Silicon)")
 else:
     device = torch.device("cpu")
-    print("GPU MPS non disponible, utilisation du CPU")
+    logging.info("GPU MPS non disponible, utilisation du CPU")
 #=================================================================================================================================================================
 # Initialisation des listes pour le suivi des performances
 #=================================================================================================================================================================
@@ -38,8 +41,8 @@ start_time = time.time()
 #=================================================================================================================================================================
 # Chargement du dataset
 #=================================================================================================================================================================
-X = np.load("X.npy")
-y = np.load("y.npy")
+X = np.load("X_200000.npy")
+y = np.load("y_200000.npy")
 
 # Conversion des données en tenseurs PyTorch
 X = torch.tensor(X)
@@ -126,7 +129,7 @@ for epoch in range(30):
     test_losses.append(test_loss)
     test_accuracies.append(test_acc)
     # affichage de la perte moyenne pour l'époque
-    print(f"Epoch {epoch} | "
+    logging.info(f"Epoch {epoch} | "
         f"Train loss: {avg_loss:.4f}, Train acc: {accuracy:.3f} | "
         f"Test loss: {test_loss:.4f}, Test acc: {test_acc:.3f}")
 
@@ -135,7 +138,7 @@ for epoch in range(30):
 #=================================================================================================================================================================
 # temps total d'entraînement
 total_training_time = time.time() - start_time
-print(f"Temps total d'entraînement : {total_training_time:.2f} secondes")
+logging.info(f"Temps total d'entraînement : {total_training_time:.2f} secondes")
 # Évaluation sur le jeu de test
 test_loss, test_acc = evaluate(model, test_loader, criterion)
 
