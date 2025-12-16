@@ -132,11 +132,14 @@ class GridWorld:
         ax, ay = self.agent
         # nouvelle position de l'agent
         nx, ny = ax + dx[action], ay + dy[action]
-        #Ajout du compteur de pas
-        self.steps +=1
+
         # Vérification des limites de la grille
         if nx < 0 or nx >= self.size or ny < 0 or ny >= self.size:
             nx, ny = ax, ay
+            # empêche l'agent de sortir de la grille
+            return self.__get_obs(), 0.0, False, {}
+        #Ajout du compteur de pas
+        self.steps +=1
         # Vérification des obstacles
         if self.grid[ny][nx] == 1:
             reward = -5.0

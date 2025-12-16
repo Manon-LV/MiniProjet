@@ -52,9 +52,10 @@ def train(visualize=False, render_interval=100):
     batch_size=64
     target_update=1000
     total_steps=0
+    nb_episodes = 30000
 
     # Boucle principale d'entraînement 
-    for episode in range(1, 2001):
+    for episode in range(1, nb_episodes + 1):
         # Initialisation de l'épisode
         s=env.reset()
         done = False
