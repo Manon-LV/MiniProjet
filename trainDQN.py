@@ -29,10 +29,19 @@ start_time = time.time()
 #==================================================================================================================================
 def train(): 
     # Initialisation de l'environnement, du réseau DQN, du buffer de relecture et des hyperparamètres
-    env= GridWorld()
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    env = GridWorld()
+    # Détection du device optimal (MPS pour Mac, sinon CUDA, sinon CPU)
+    if torch.backends.mps.is_available() and torch.backends.mps.is_built():
+        device = torch.device('mps')
+        print("[INFO] Utilisation du GPU MPS (Apple Silicon)")
+    elif torch.cuda.is_available():
+        device = torch.device('cuda')
+        print("[INFO] Utilisation du GPU CUDA")
+    else:
+        device = torch.device('cpu')
+        print("[INFO] Utilisation du CPU uniquement")
     policy_net = DQN().to(device)
-    target_net = DQN() .to(device)
+    target_net = DQN().to(device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -116,7 +125,7 @@ def train():
     return device
 # Lancement de l'entraînement
 if __name__ == "__main__":
-    device =train()
+    device = train()
     end_time = time.time()
     training_time = end_time - start_time
 

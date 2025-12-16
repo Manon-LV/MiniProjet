@@ -79,8 +79,10 @@ env = GridWorld()
 X, y = [], []
 
 # Boucle pour générer des échantillons de données
-for _ in range(20000):
+for n in range(200000):
     obs = env.reset()
+    if n % 1000 == 0:
+        print(f"Échantillons générés: {n}")
     # Utilise la grille et la taille pour best_action (A* diversité)
     action = best_action(env.agent, env.goal, env.grid, env.size)
     X.append(obs)
