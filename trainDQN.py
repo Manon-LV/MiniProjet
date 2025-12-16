@@ -52,14 +52,15 @@ def train():
     rb = ReplayBuffer()
     eps_start = 1.0
     eps_end = 0.05
-    eps_decay = 20000
+    #eps_decay = 20000
     gamma = 0.95
     batch_size=64
     target_update=1000
     total_steps=0
+    nb_episodes = 1000
 
     # Boucle principale d'entraînement 
-    for episode in range(1, 10001):
+    for episode in range(1, nb_episodes + 1):
         # Initialisation de l'épisode
         s=env.reset()
         done = False
@@ -67,7 +68,8 @@ def train():
         # Boucle de l'épisode
         while not done:
             total_steps += 1
-            eps = eps_end + (eps_start - eps_end) * np.exp(-1. * total_steps / eps_decay)
+            #eps = eps_end + (eps_start - eps_end) * np.exp(-1. * total_steps / eps_decay)
+            eps = max(eps_end, eps_start - (eps_start - eps_end) * (episode / nb_episodes))
             # Sélection de l'action selon une politique epsilon-greedy
             if random.random() < eps:
                 a = random.randrange(4)
@@ -121,10 +123,13 @@ def train():
         episode_rewards.append(episode_reward)
 
         # Affichage des statistiques de l'épisode    
-        if episode %10 == 0:
-            logging.info(f"Episode {episode}, Reward: {episode_reward:.2f}, Epsilon: {eps:.3f}")
+        if episode %10 == 0:            
+            logging.info(f"Episode {episode}, Reward: {episode_reward:.2f}, Epsilon: {eps:.3f}, Success Rate: {success_rates[-1]:.3f}, Loss: {loss.item() if 'loss' in locals() else 0.0:.4f}, Steps: {env.steps}")
         # Enregistrement du temps d'entraînement
         training_times.append(time.time() - start_time)
+    # Sauvegarde du modèle entraîné
+    torch.save(policy_net.state_dict(), 'dqn_model.pth')
+    logging.info("\n✓ Modèle sauvegardé dans 'dqn_model.pth'")
     return device
 # Lancement de l'entraînement
 if __name__ == "__main__":
