@@ -27,7 +27,14 @@ start_time = time.time()
 #==================================================================================================================================
 #Implémentation de la boucle d'entraînement DQN
 #==================================================================================================================================
-def train(): 
+def train(visualize=False, render_interval=100): 
+    """
+    Entraîne un agent DQN sur l'environnement GridWorld.
+    
+    Args:
+        visualize (bool): Si True, affiche la visualisation pour certains épisodes.
+        render_interval (int): Intervalle d'épisodes pour la visualisation (défaut: 100).
+    """
     # Initialisation de l'environnement, du réseau DQN, du buffer de relecture et des hyperparamètres
     env= GridWorld()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -52,6 +59,13 @@ def train():
         s=env.reset()
         done = False
         episode_reward = 0.0
+        
+        # Visualisation pour certains épisodes
+        should_render = visualize and (episode % render_interval == 0 or episode in [1, 10, 50])
+        if should_render:
+            print(f"\n🎬 Visualisation de l'épisode {episode}")
+            env.render(episode=episode, reward=episode_reward, delay=0.1, epsilon=1.0)  # Epsilon initial
+        
         # Boucle de l'épisode
         while not done:
             total_steps += 1
@@ -70,6 +84,11 @@ def train():
             rb.push(s, a, r, s2, done)
             s = s2
             episode_reward += r
+            
+            # Visualisation si activée
+            if should_render:
+                env.render(episode=episode, reward=episode_reward, delay=0.05, epsilon=eps)
+            
             # Mise à jour du réseau DQN
             if len(rb) >= batch_size:
                 batch = rb.sample(batch_size)
@@ -113,10 +132,28 @@ def train():
             print(f"Episode {episode}, Reward: {episode_reward:.2f}, Epsilon: {eps:.3f}")
         # Enregistrement du temps d'entraînement
         training_times.append(time.time() - start_time)
+    
+    # Fermeture de la visualisation si elle était active
+    if visualize:
+        env.close()
+    
+    # Sauvegarde du modèle entraîné
+    torch.save(policy_net.state_dict(), 'dqn_model.pth')
+    print("\n✓ Modèle sauvegardé dans 'dqn_model.pth'")
+    
     return device
 # Lancement de l'entraînement
 if __name__ == "__main__":
-    device =train()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Entraînement DQN pour GridWorld')
+    parser.add_argument('--visualize', action='store_true', 
+                       help='Active la visualisation pendant l\'entraînement')
+    parser.add_argument('--render-interval', type=int, default=100,
+                       help='Intervalle d\'épisodes pour la visualisation (défaut: 100)')
+    args = parser.parse_args()
+    
+    device = train(visualize=args.visualize, render_interval=args.render_interval)
     end_time = time.time()
     training_time = end_time - start_time
 

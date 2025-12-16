@@ -20,6 +20,8 @@
 #==================================================================================================================================
 import numpy as np
 import random
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 
 #==================================================================================================================================
 #Implémentation de la classe GridWorld
@@ -40,6 +42,8 @@ class GridWorld:
         self.size = size
         self.n_obstacle = n_obstacle
         self.max_step = max_step
+        self.fig = None
+        self.ax = None
         self.reset() 
 
 
@@ -147,3 +151,76 @@ class GridWorld:
         if self.steps >= self.max_step:
             return self.__get_obs(), -0.5, True, {}
         return self.__get_obs(), -0.01, False, {}
+
+
+    #fonction pour visualiser l'environnement
+    def render(self, episode=None, reward=None, delay=0.1, epsilon=None):
+        '''
+        Visualise l'environnement GridWorld avec matplotlib.
+        inputs:
+            episode (int): Numéro de l'épisode actuel (optionnel).
+            reward (float): Récompense cumulée de l'épisode (optionnel).
+            delay (float): Délai entre les frames en secondes (0.1 par défaut).
+            epsilon (float): Valeur d'epsilon-greedy (optionnel).
+        '''
+        if self.fig is None:
+            plt.ion()  # Mode interactif
+            self.fig, self.ax = plt.subplots(figsize=(8, 8))
+        
+        self.ax.clear()
+        self.ax.set_xlim(0, self.size)
+        self.ax.set_ylim(0, self.size)
+        self.ax.set_aspect('equal')
+        self.ax.grid(True, which='both', linestyle='-', linewidth=0.5, alpha=0.3)
+        self.ax.set_xticks(np.arange(0, self.size, 1))
+        self.ax.set_yticks(np.arange(0, self.size, 1))
+        
+        # Dessiner les obstacles (gris foncé)
+        for y in range(self.size):
+            for x in range(self.size):
+                if self.grid[y][x] == 1:
+                    rect = Rectangle((x, self.size - 1 - y), 1, 1, 
+                                   facecolor='#2c3e50', edgecolor='black', linewidth=1)
+                    self.ax.add_patch(rect)
+        
+        # Dessiner l'objectif (vert)
+        gx, gy = self.goal
+        goal_rect = Rectangle((gx, self.size - 1 - gy), 1, 1, 
+                             facecolor='#2ecc71', edgecolor='black', linewidth=2)
+        self.ax.add_patch(goal_rect)
+        self.ax.text(gx + 0.5, self.size - 1 - gy + 0.5, '★', 
+                    fontsize=30, ha='center', va='center', color='white')
+        
+        # Dessiner l'agent (bleu)
+        ax, ay = self.agent
+        agent_rect = Rectangle((ax, self.size - 1 - ay), 1, 1, 
+                              facecolor='#3498db', edgecolor='black', linewidth=2)
+        self.ax.add_patch(agent_rect)
+        self.ax.text(ax + 0.5, self.size - 1 - ay + 0.5, '●', 
+                    fontsize=30, ha='center', va='center', color='white')
+        
+        # Afficher les métriques
+        title = f'GridWorld {self.size}x{self.size}'
+        if episode is not None:
+            title += f' | Episode: {episode}'
+        title += f' | Steps: {self.steps}/{self.max_step}'
+        if reward is not None:
+            title += f' | Reward: {reward:.2f}'
+        if epsilon is not None:
+            title += f' | Eps: {epsilon:.3f}'
+        
+        self.ax.set_title(title, fontsize=14, fontweight='bold')
+        
+        plt.pause(delay)
+        plt.draw()
+    
+
+
+    def close(self):
+        '''
+        Ferme la fenêtre de visualisation.
+        '''
+        if self.fig is not None:
+            plt.close(self.fig)
+            self.fig = None
+            self.ax = None
