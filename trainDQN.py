@@ -57,7 +57,7 @@ def train():
     batch_size=64
     target_update=1000
     total_steps=0
-    nb_episodes = 1000
+    nb_episodes = 20000
 
     # Boucle principale d'entraînement 
     for episode in range(1, nb_episodes + 1):
