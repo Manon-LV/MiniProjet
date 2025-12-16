@@ -18,13 +18,11 @@ class CNN(nn.Module):
         # Appel du constructeur de la classe parente nn.Module
         super().__init__()
         # Définition des couches du réseau
-        # Couches convolutionnelles pour extraire les caractéristiques de l'entrée
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
-        # Deuxième couche convolutionnelle pour extraire des caractéristiques plus complexes
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
-        # Couches entièrement connectées pour produire les probabilités d'action
-        self.fc1 = nn.Linear(32 * 10 * 10, 128)
-        # Couche de sortie pour produire les scores pour chaque action
+        self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
+        self.pool1 = nn.MaxPool2d(2)  # taille 5x5
+        self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
+        self.pool2 = nn.MaxPool2d(2)  # taille 2x2
+        self.fc1 = nn.Linear(32*10*10, 128)
         self.fc2 = nn.Linear(128, 4)
 
     # Fonction de passage en avant du réseau

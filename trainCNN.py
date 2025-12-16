@@ -35,8 +35,8 @@ X = np.load("X.npy")
 y = np.load("y.npy")
 
 # Conversion des données en tenseurs PyTorch
-X = torch.tensor(X)
-y = torch.tensor(y)
+X = torch.tensor(X, dtype = torch.float32)
+y = torch.tensor(y, dtype = torch.float32)
 
 # Création du DataLoader pour le dataset
 dataset = torch.utils.data.TensorDataset(X, y)
@@ -54,7 +54,7 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=F
 # Initialisation du modèle, de l'optimiseur et de la fonction de perte
 model = CNN.CNN()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-criterion = torch.nn.CrossEntropyLoss()
+criterion = torch.nn.KLDivLoss(reduction="batchmean")
 model.train()
 
 
@@ -71,11 +71,13 @@ def evaluate(model, test_loader, criterion):
         # boucle sur les batches de données
         for xb, yb in test_loader:
             logits = model(xb)
-            loss = criterion(logits, yb)
+            log_probs = torch.log_softmax(logits, dim=1)
+            loss = criterion(log_probs, yb)
             total_loss += loss.item()
 
             preds = torch.argmax(logits, dim=1)
-            correct += (preds == yb).sum().item()
+            true_actions = torch.argmax(yb, dim=1)
+            correct += (preds == true_actions).sum().item()
             total += yb.size(0)
     # Calcul des métriques
     avg_loss = total_loss / len(test_loader)
@@ -94,14 +96,16 @@ for epoch in range(30):
     for xb, yb in train_loader:
         # passage avant, calcul de la perte, rétropropagation et mise à jour des poids
         logits = model(xb)
-        loss = criterion(logits, yb)
+        log_probs = torch.log_softmax(logits, dim=1)
+        loss = criterion(log_probs, yb)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         # mise à jour des statistiques de l'époque
         epoch_loss += loss.item()
         preds = torch.argmax(logits, dim=1)
-        correct += (preds == yb).sum().item()
+        true_actions = torch.argmax(yb, dim=1)
+        correct += (preds == true_actions).sum().item()
         total += yb.size(0)
     # Calcul des métriques de l'époque
     avg_loss = epoch_loss / len(train_loader)
