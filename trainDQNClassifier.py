@@ -19,7 +19,12 @@ def train_dqn_classifier():
     # Si X est 3D (ex: images), on aplatit chaque exemple
     if len(X.shape) > 2:
         X = X.reshape(X.shape[0], -1)
-    # Split train/test
+        # Normalisation torch (centrage/réduction)
+        X_mean = torch.from_numpy(X).mean(dim=0, keepdim=True)
+        X_std = torch.from_numpy(X).std(dim=0, keepdim=True)
+        X = (torch.from_numpy(X) - X_mean) / (X_std + 1e-8)
+        X = X.numpy().astype(np.float32)
+        # Split train/test
         # Création du TensorDataset
         X_tensor = torch.tensor(X)
         y_tensor = torch.tensor(y)
