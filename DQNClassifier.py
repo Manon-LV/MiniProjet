@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class DQNClassifier(nn.Module):
-    def __init__(self, input_dim, n_classes, hidden_dim=128, dropout_p=0.5):
+    def __init__(self, input_dim, n_classes, hidden_dim=128, dropout_p=0.8):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
