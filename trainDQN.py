@@ -57,7 +57,7 @@ def train():
     batch_size=64
     target_update=1000
     total_steps=0
-    nb_episodes = 20000
+    nb_episodes = 1000
 
     # Boucle principale d'entraînement 
     for episode in range(1, nb_episodes + 1):
@@ -69,7 +69,8 @@ def train():
         while not done:
             total_steps += 1
             #eps = eps_end + (eps_start - eps_end) * np.exp(-1. * total_steps / eps_decay)
-            eps = max(eps_end, eps_start - (eps_start - eps_end) * (episode / nb_episodes))
+            #eps = max(eps_end, eps_start - (eps_start - eps_end) * (episode / nb_episodes))
+            eps = max(eps_end, eps_start - (episode) / (nb_episodes))
             # Sélection de l'action selon une politique epsilon-greedy
             if random.random() < eps:
                 a = random.randrange(4)
