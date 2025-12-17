@@ -72,7 +72,7 @@ def train():
         done = False
         episode_reward = 0.0
         # Boucle de l'épisode
-        while not done:
+        while not done:   
             total_steps += 1
             #eps = eps_end + (eps_start - eps_end) * np.exp(-1. * total_steps / eps_decay)
             #eps = max(eps_end, eps_start - (eps_start - eps_end) * (episode / nb_episodes))

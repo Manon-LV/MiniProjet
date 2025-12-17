@@ -31,17 +31,19 @@ class GridWorld:
 
 
     #Constructeur de la classe GridWorld
-    def __init__(self, size=10, n_obstacle=5, max_step=200):
+    def __init__(self, size=10, n_obstacle=5, max_step=200, repeat_penalty: float = -0.5):
         ''' 
         Constructeur de la classe GridWorld.
         inputs:
             size (int): Taille de la grille (la grille a une forme carrée) (size x size).
             n_obstacle (int): Nombre d'obstacles dans la grille.
             max_step (int): Nombre maximum d'étapes par épisode.
+            repeat_penalty (float): Pénalité appliquée lorsqu'une case déjà visitée est revisitée durant l'épisode.
         '''
         self.size = size
         self.n_obstacle = n_obstacle
         self.max_step = max_step
+        self.repeat_penalty = repeat_penalty
         self.fig = None
         self.ax = None
         self.reset() 
@@ -82,6 +84,9 @@ class GridWorld:
                 break
         self.goal = (gx, gy)
         self.steps = 0
+        # Suivi des cases visitées pendant l'épisode
+        self.visited = set()
+        self.visited.add(self.agent)
         return self.__get_obs()
 
 
@@ -143,7 +148,13 @@ class GridWorld:
             done = True
             self.agent = (nx, ny)
             return self.__get_obs(), reward, done, {}
+        # Pénalité si la case a déjà été visitée pendant l'épisode
+        revisit_penalty = self.repeat_penalty if (nx, ny) in getattr(self, 'visited', set()) else 0.0
+
         self.agent = (nx, ny)
+        # Enregistrer la visite de la case actuelle
+        if hasattr(self, 'visited'):
+            self.visited.add(self.agent)
         # Vérification de l'objectif
         if self.agent == self.goal:
             return self.__get_obs(), 100.0, True, {}
@@ -154,7 +165,9 @@ class GridWorld:
         gx, gy = self.goal
         dist = abs(gx - nx) + abs(gy - ny)
         distance_penalty = -0.05 * dist
-        return self.__get_obs(), -0.1 + distance_penalty, False, {}
+        # Récompense avec shaping + pénalité de revisite
+        reward = -0.1 + distance_penalty + revisit_penalty
+        return self.__get_obs(), reward, False, {}
 
 
     #fonction pour visualiser l'environnement

@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 #==================================================================================================================================
 #Fonction principale de visualisation
 #==================================================================================================================================
-def visualize_agent(model_path='dqn_model.pth', n_episodes=5, delay=0.3, size=10, n_obstacle=5):
+def visualize_agent(model_path='dqn_model.pth', n_episodes=100, delay=1, size=10, n_obstacle=5):
     """
     Visualise un agent DQN entraîné en action.
     
@@ -122,14 +122,14 @@ def visualize_agent(model_path='dqn_model.pth', n_episodes=5, delay=0.3, size=10
 #Point d'entrée du script
 #==================================================================================================================================
 if __name__ == "__main__":
-    pathToModel = 'dqn_model03.pth'
+    pathToModel = 'dqn_model.pth'
     parser = argparse.ArgumentParser(description="Visualise un agent DQN en action dans GridWorld")
     parser.add_argument('--model', type=str, default= pathToModel, 
                        help=f'Chemin vers le modèle sauvegardé (défaut: {pathToModel})')
-    parser.add_argument('--episodes', type=int, default=5, 
-                       help='Nombre d\'épisodes à visualiser (défaut: 5)')
-    parser.add_argument('--delay', type=float, default=0.3, 
-                       help='Délai entre les frames en secondes (défaut: 0.3)')
+    parser.add_argument('--episodes', type=int, default=100, 
+                       help='Nombre d\'épisodes à visualiser (défaut: 100)')
+    parser.add_argument('--delay', type=float, default=1, 
+                       help='Délai entre les frames en secondes (défaut: 1)')
     parser.add_argument('--size', type=int, default=10, 
                        help='Taille de la grille (défaut: 10)')
     parser.add_argument('--obstacles', type=int, default=5, 
