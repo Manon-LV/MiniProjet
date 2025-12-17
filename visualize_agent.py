@@ -122,7 +122,7 @@ def visualize_agent(model_path='dqn_model.pth', n_episodes=5, delay=0.3, size=10
 #Point d'entrée du script
 #==================================================================================================================================
 if __name__ == "__main__":
-    pathToModel = 'dqn_model03.pth'
+    pathToModel = '../../results/DQN/02/dqn_model.pth'
     parser = argparse.ArgumentParser(description="Visualise un agent DQN en action dans GridWorld")
     parser.add_argument('--model', type=str, default= pathToModel, 
                        help=f'Chemin vers le modèle sauvegardé (défaut: {pathToModel})')
