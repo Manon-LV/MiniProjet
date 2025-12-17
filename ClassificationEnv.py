@@ -9,6 +9,10 @@ class ClassificationEnv:
         self.current = 0
 
     def reset(self):
+        # Mélange les exemples à chaque reset
+        idx = np.random.permutation(self.n_samples)
+        self.X = self.X[idx]
+        self.y = self.y[idx]
         self.current = 0
         return self.X[self.current]
 

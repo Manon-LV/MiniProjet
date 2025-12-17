@@ -6,11 +6,18 @@ from ReplayBuffer import ReplayBuffer
 from DQNClassifier import DQNClassifier
 from ClassificationEnv import ClassificationEnv
 import torch.utils.data
+import random
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
 def train_dqn_classifier():
+    # Seed globale pour reproductibilité
+    seed = 42
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+    random.seed(seed)
     # Chargement des données
 
     X = np.load('X_20000.npy')
@@ -51,9 +58,9 @@ def train_dqn_classifier():
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
-    optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
+    optimizer = optim.Adam(policy_net.parameters(), lr=1e-3, weight_decay=1e-4)
     rb = ReplayBuffer()
-    gamma = 0.99
+    gamma = 0.0
     batch_size = 64
     target_update = 100
     nb_episodes = 10
