@@ -31,6 +31,12 @@ start_time = time.time()
 #Implémentation de la boucle d'entraînement DQN
 #==================================================================================================================================
 def train(): 
+    # Initialisation de la seed pour reproductibilité (comme RL_course)
+    seed = 2023
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    random.seed(seed)
+
     # Initialisation de l'environnement, du réseau DQN, du buffer de relecture et des hyperparamètres
     env = GridWorld()
     # Détection du device optimal (MPS pour Mac, sinon CUDA, sinon CPU)
@@ -57,7 +63,7 @@ def train():
     batch_size=64
     target_update=1000
     total_steps=0
-    nb_episodes = 1000
+    nb_episodes = 10000
 
     # Boucle principale d'entraînement 
     for episode in range(1, nb_episodes + 1):

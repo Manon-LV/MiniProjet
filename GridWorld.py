@@ -146,11 +146,15 @@ class GridWorld:
         self.agent = (nx, ny)
         # Vérification de l'objectif
         if self.agent == self.goal:
-            return self.__get_obs(), 10.0, True, {}
+            return self.__get_obs(), 100.0, True, {}
         # Vérification du nombre maximum de pas
         if self.steps >= self.max_step:
-            return self.__get_obs(), -0.5, True, {}
-        return self.__get_obs(), -0.01, False, {}
+            return self.__get_obs(), -1, True, {}
+        # Shaping : pénalité distance à l'objectif (distance de Manhattan)
+        gx, gy = self.goal
+        dist = abs(gx - nx) + abs(gy - ny)
+        distance_penalty = -0.05 * dist
+        return self.__get_obs(), -0.1 + distance_penalty, False, {}
 
 
     #fonction pour visualiser l'environnement
