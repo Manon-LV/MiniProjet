@@ -5,20 +5,35 @@ import torch.optim as optim
 from ReplayBuffer import ReplayBuffer
 from DQNClassifier import DQNClassifier
 from ClassificationEnv import ClassificationEnv
+import torch.utils.data
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
 def train_dqn_classifier():
     # Chargement des données
+
     X = np.load('X_20000.npy')
     y = np.load('y_20000.npy')
     X = X.astype(np.float32)
     # Si X est 3D (ex: images), on aplatit chaque exemple
     if len(X.shape) > 2:
         X = X.reshape(X.shape[0], -1)
-    env = ClassificationEnv(X, y)
-    input_dim = X.shape[1]
+    # Split train/test
+        # Création du TensorDataset
+        X_tensor = torch.tensor(X)
+        y_tensor = torch.tensor(y)
+        dataset = torch.utils.data.TensorDataset(X_tensor, y_tensor)
+        train_size = int(0.8 * len(dataset))
+        test_size = len(dataset) - train_size
+        train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
+        # Extraction numpy pour l'env RL
+        X_train = X_tensor[train_dataset.indices].numpy()
+        y_train = y_tensor[train_dataset.indices].numpy()
+        X_test = X_tensor[test_dataset.indices].numpy()
+        y_test = y_tensor[test_dataset.indices].numpy()
+    env = ClassificationEnv(X_train, y_train)
+    input_dim = X_train.shape[1]
     n_classes = len(np.unique(y))
 
     # Device
@@ -43,6 +58,7 @@ def train_dqn_classifier():
     eps_decay = 5000
     losses = []
     accuracy_history = []
+    test_accuracy_history = []
 
     for episode in range(nb_episodes):
         obs = env.reset()
@@ -86,7 +102,16 @@ def train_dqn_classifier():
                 target_net.load_state_dict(policy_net.state_dict())
         acc = correct / total
         accuracy_history.append(acc)
-        logging.info(f"Episode {episode+1}/{nb_episodes} | Accuracy: {acc:.4f}")
+        # Évaluation sur le test set
+        policy_net.eval()
+        with torch.no_grad():
+            X_test_tensor = torch.tensor(X_test, dtype=torch.float32).to(device)
+            q_test = policy_net(X_test_tensor)
+            y_pred = q_test.argmax(1).cpu().numpy()
+            test_acc = (y_pred == y_test).mean()
+            test_accuracy_history.append(test_acc)
+        policy_net.train()
+        logging.info(f"Episode {episode+1}/{nb_episodes} | Train acc: {acc:.4f} | Test acc: {test_acc:.4f}")
     torch.save(policy_net.state_dict(), 'dqn_classifier_model.pth')
     logging.info("Modèle DQNClassifier sauvegardé dans 'dqn_classifier_model.pth'")
     return accuracy_history, losses
