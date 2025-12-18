@@ -35,38 +35,15 @@ def test_dqn(model_path, n_episodes=1000, size=10, n_obstacle=5):
             success_window.pop(0)
         success_rates.append(np.mean(success_window))
 
-    # Courbes
+    # Sauvegarde des courbes pour affichage dans le notebook
+    import os
+    os.makedirs('results/03', exist_ok=True)
     window = 100
     avg_rewards = np.convolve(episode_rewards, np.ones(window)/window, mode='valid')
-    plt.figure()
-    plt.plot(avg_rewards)
-    plt.xlabel('Episodes')
-    plt.ylabel('Average reward (100 episodes)')
-    plt.title('Récompense moyenne glissante')
-    plt.grid()
-
-    plt.figure()
-    plt.plot(success_rates)
-    plt.xlabel('Episodes')
-    plt.ylabel('Success rate (moving average 100)')
-    plt.title('Taux de succès')
-    plt.grid()
-
-    plt.figure()
-    plt.plot(episode_rewards)
-    plt.xlabel('Episodes')
-    plt.ylabel('Episode reward')
-    plt.title('Récompense par épisode')
-    plt.grid()
-
-    plt.figure()
-    plt.plot(steps_per_episode)
-    plt.xlabel('Episodes')
-    plt.ylabel('Steps per episode')
-    plt.title('Nombre de pas par épisode')
-    plt.grid()
-
-    plt.show()
+    np.save('results/03/testdqn_avg_rewards.npy', avg_rewards)
+    np.save('results/03/testdqn_success_rates.npy', np.array(success_rates))
+    np.save('results/03/testdqn_episode_rewards.npy', np.array(episode_rewards))
+    np.save('results/03/testdqn_steps_per_episode.npy', np.array(steps_per_episode))
 
 if __name__ == '__main__':
     test_dqn('dqn_model03.pth', n_episodes=1000)
