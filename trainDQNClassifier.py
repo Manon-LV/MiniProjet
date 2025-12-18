@@ -124,8 +124,16 @@ def train_dqn_classifier():
             test_accuracy_history.append(test_acc)
         policy_net.train()
         logging.info(f"Episode {episode+1}/{nb_episodes} | Train acc: {acc:.4f} | Test acc: {test_acc:.4f}")
+
     torch.save(policy_net.state_dict(), 'dqn_classifier_model.pth')
     logging.info("Modèle DQNClassifier sauvegardé dans 'dqn_classifier_model.pth'")
+
+    # Sauvegarde des courbes pour affichage dans le notebook
+    import os
+    os.makedirs('results/03', exist_ok=True)
+    np.save('results/03/dqnclassifier_train_accuracies.npy', np.array(accuracy_history))
+    np.save('results/03/dqnclassifier_test_accuracies.npy', np.array(test_accuracy_history))
+    np.save('results/03/dqnclassifier_losses.npy', np.array(losses))
     return accuracy_history, losses
 
 if __name__ == "__main__":

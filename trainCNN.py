@@ -154,23 +154,15 @@ plt.title("Accuracy – agent supervisé")
 plt.legend()
 plt.grid()
 
-# Courbe de loss
-plt.figure()
-plt.plot(train_losses, label="Train loss")
-plt.plot(test_losses, label="Test loss")
-plt.xlabel("Epochs")
-plt.ylabel("Loss")
-plt.title("Loss – agent supervisé")
-plt.legend()
-plt.grid()
+
+# Sauvegarde des courbes pour affichage dans le notebook
+import os
+os.makedirs('results/03', exist_ok=True)
+np.save('results/03/cnn_train_accuracies.npy', np.array(train_accuracies))
+np.save('results/03/cnn_test_accuracies.npy', np.array(test_accuracies))
+np.save('results/03/cnn_train_losses.npy', np.array(train_losses))
+np.save('results/03/cnn_test_losses.npy', np.array(test_losses))
+np.save('results/03/cnn_epoch_times.npy', np.array(epoch_times))
 
 
-# Courbe du temps d'entraînement cumulé
-plt.figure()
-plt.plot(np.cumsum(epoch_times))
-plt.xlabel("Epochs")
-plt.ylabel("Temps cumulé (s)")
-plt.title("Temps d'entraînement – agent supervisé")
-plt.grid()
-plt.show()
 

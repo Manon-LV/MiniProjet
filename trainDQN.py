@@ -155,50 +155,19 @@ if __name__ == "__main__":
 #Affichage des courbes d'évaluation
 #==================================================================================================================================
 
+
+# Sauvegarde des courbes pour affichage dans le notebook
+import os
+os.makedirs('results/03', exist_ok=True)
 window = 100
 avg_rewards = np.convolve(
     episode_rewards,
     np.ones(window)/window,
     mode="valid"
 )
-
-plt.figure()
-plt.plot(avg_rewards)
-plt.xlabel("Episodes")
-plt.ylabel("Average reward (100 episodes)")
-plt.title("Récompense moyenne glissante")
-plt.grid()
-
-# Courbe du taux de succès
-plt.figure()
-plt.plot(success_rates)
-plt.xlabel("Episodes")
-plt.ylabel("Success rate (moving average 100)")
-plt.title("Taux de succès")
-plt.grid()
-
-# Courbe de la récompense par épisode
-plt.figure()
-plt.plot(episode_rewards)
-plt.xlabel("Episodes")
-plt.ylabel("Episode reward")
-plt.title("Récompense par épisode")
-plt.grid()
-
-# Courbe de la perte DQN
-plt.figure()
-plt.plot(losses)
-plt.xlabel("Training steps")
-plt.ylabel("Loss")
-plt.title("Loss DQN")
-plt.grid()
-
-# Courbe du temps d'entraînement
-plt.figure()
-plt.plot(training_times)
-plt.xlabel("Episodes")
-plt.ylabel("Temps cumulé (s)")
-plt.title("Temps d'entraînement")
-plt.grid()
-plt.show()
+np.save('results/03/dqn_avg_rewards.npy', avg_rewards)
+np.save('results/03/dqn_success_rates.npy', success_rates)
+np.save('results/03/dqn_episode_rewards.npy', episode_rewards)
+np.save('results/03/dqn_losses.npy', losses)
+np.save('results/03/dqn_training_times.npy', training_times)
 
